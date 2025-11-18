@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MX2PRO - Janus 3D Viewer</title>
+    <link rel="stylesheet" href="/static/css/threejs_viewer.css">
+</head>
+<body>
+    <div class="logo">
+        MX2<span>PRO</span>
+    </div>
+
+    <div id="viewer-container"></div>
+
+    <div class="controls-panel">
+        <h2>Gallery Controls</h2>
+
+        <div class="control-group">
+            <label for="layout-select">Layout Mode</label>
+            <select id="layout-select">
+                <option value="grid">Grid Layout</option>
+                <option value="carousel">Carousel</option>
+                <option value="spiral">Spiral</option>
+                <option value="wall">Wall Gallery</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="image-scale">Image Scale</label>
+            <div class="slider-container">
+                <input type="range" id="image-scale" min="0.5" max="3" step="0.1" value="1.5">
+                <span class="slider-value" id="scale-value">1.5</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="spacing">Spacing</label>
+            <div class="slider-container">
+                <input type="range" id="spacing" min="1" max="5" step="0.1" value="2.5">
+                <span class="slider-value" id="spacing-value">2.5</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="auto-rotate">
+                <label for="auto-rotate">Auto Rotate</label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="show-labels" checked>
+                <label for="show-labels">Show Labels</label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Image Upload</label>
+            <div class="image-upload-zone" id="upload-zone">
+                <p>📁 Drop images here or click to upload</p>
+                <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <button id="load-sample-btn">Load Sample Images</button>
+            <button id="add-particles-btn" class="secondary">Add Particle Effect</button>
+            <button id="export-scene-btn" class="secondary">Export Scene</button>
+            <button id="clear-btn" class="danger">Clear Gallery</button>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <h3>Scene Info</h3>
+        <p><strong>Images:</strong> <span id="image-count">0</span></p>
+        <p><strong>Layout:</strong> <span id="current-layout">Grid</span></p>
+        <p><strong>FPS:</strong> <span id="fps">60</span></p>
+        <p><strong>Renderer:</strong> WebGL</p>
+    </div>
+
+    <div class="loading-overlay" id="loading" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Three.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Custom scripts -->
+    <script src="/static/js/threejs_viewer.js"></script>
+    <script src="/static/js/image_gallery_3d.js"></script>
+
+    <script>
+        let gallery;
+        let uploadedImages = [];
+        let lastFrameTime = Date.now();
+        let fps = 60;
+
+        // Initialize gallery
+        function initGallery() {
+            gallery = new ImageGallery3D('viewer-container', {
+                layout: 'grid',
+                imageScale: 1.5,
+                spacing: 2.5,
+                autoRotate: false
+            });
+
+            // Start FPS counter
+            setInterval(updateFPS, 1000);
+        }
+
+        function updateFPS() {
+            const now = Date.now();
+            fps = Math.round(1000 / (now - lastFrameTime));
+            lastFrameTime = now;
+            document.getElementById('fps').textContent = fps;
+        }
+
+        // Load sample images from API
+        async function loadSampleImages() {
+            showLoading();
+            try {
+                const response = await fetch('/api/sample-images');
+                const data = await response.json();
+
+                if (data.images && data.images.length > 0) {
+                    gallery.addImages(data.images, data.metadata || []);
+                    updateImageCount(data.images.length);
+                } else {
+                    // Load default sample images
+                    const sampleImages = [
+                        'https://picsum.photos/800/600?random=1',
+                        'https://picsum.photos/800/600?random=2',
+                        'https://picsum.photos/800/600?random=3',
+                        'https://picsum.photos/800/600?random=4',
+                        'https://picsum.photos/800/600?random=5'
+                    ];
+                    gallery.addImages(sampleImages);
+                    updateImageCount(sampleImages.length);
+                }
+            } catch (error) {
+                console.error('Error loading sample images:', error);
+                // Fallback to placeholder images
+                const sampleImages = [
+                    'https://picsum.photos/800/600?random=1',
+                    'https://picsum.photos/800/600?random=2',
+                    'https://picsum.photos/800/600?random=3'
+                ];
+                gallery.addImages(sampleImages);
+                updateImageCount(sampleImages.length);
+            }
+            hideLoading();
+        }
+
+        function updateImageCount(count) {
+            document.getElementById('image-count').textContent = count;
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Event listeners
+        document.getElementById('layout-select').addEventListener('change', (e) => {
+            gallery.setLayout(e.target.value);
+            document.getElementById('current-layout').textContent =
+                e.target.options[e.target.selectedIndex].text;
+        });
+
+        document.getElementById('image-scale').addEventListener('input', (e) => {
+            gallery.imageScale = parseFloat(e.target.value);
+            document.getElementById('scale-value').textContent = e.target.value;
+            gallery.repositionImages();
+        });
+
+        document.getElementById('spacing').addEventListener('input', (e) => {
+            gallery.imageSpacing = parseFloat(e.target.value);
+            document.getElementById('spacing-value').textContent = e.target.value;
+            gallery.repositionImages();
+        });
+
+        document.getElementById('auto-rotate').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                gallery.enableAutoRotate();
+            } else {
+                gallery.disableAutoRotate();
+            }
+        });
+
+        document.getElementById('show-labels').addEventListener('change', (e) => {
+            gallery.showLabels = e.target.checked;
+        });
+
+        document.getElementById('load-sample-btn').addEventListener('click', loadSampleImages);
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            gallery.clearImages();
+            uploadedImages = [];
+            updateImageCount(0);
+        });
+
+        document.getElementById('export-scene-btn').addEventListener('click', () => {
+            gallery.exportScene('mx2pro-scene.json');
+        });
+
+        document.getElementById('add-particles-btn').addEventListener('click', () => {
+            if (uploadedImages.length > 0) {
+                gallery.createParticleSystem(uploadedImages[0]);
+            } else {
+                alert('Please load images first!');
+            }
+        });
+
+        // File upload handling
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragging');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragging');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragging');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            showLoading();
+            uploadedImages = [];
+
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImages.push(e.target.result);
+
+                        if (uploadedImages.length === files.length) {
+                            gallery.addImages(uploadedImages);
+                            updateImageCount(uploadedImages.length);
+                            hideLoading();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initGallery();
+        });
+
+        // Handle window cleanup
+        window.addEventListener('beforeunload', () => {
+            if (gallery) {
+                gallery.dispose();
+            }
+        });
+    </script>
+</body>
+</html>

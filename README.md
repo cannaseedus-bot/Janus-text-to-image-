@@ -62,6 +62,8 @@
 
 ## News
 
+**NEW - MX2PRO Three.js Graphics Integration**: Enhanced 3D visualization for Janus! View generated images in stunning 3D galleries with WebGL-accelerated rendering, multiple layout modes, and interactive controls. See [MX2PRO demo](#mx2pro-three-js-graphics-boost) for details.
+
 **2025.01.27**: Janus-Pro is released, an advanced version of Janus, improving both multimodal understanding and visual generation significantly. See [paper](./janus_pro_tech_report.pdf)
 
 **2024.11.13**: JanusFlow is released, a new unified model with rectified flow for image generation. See [paper](https://arxiv.org/abs/2411.07975), [demo](https://huggingface.co/spaces/deepseek-ai/JanusFlow-1.3B) and [usage](https://github.com/deepseek-ai/Janus?tab=readme-ov-file#janusflow).
@@ -98,7 +100,51 @@ Generation with Data and Model Scaling</b></a>
 <div align="center">
 <img alt="image" src="images/teaser_janusflow.png" style="width:90%;">
 </div>
- 
+
+---
+
+## 🎮 MX2PRO Three.js Graphics Boost
+
+**NEW!** Experience Janus in a whole new dimension with our Three.js-powered 3D visualization system.
+
+### Features
+
+- **3D Image Gallery**: Display generated images in interactive 3D environments
+- **Multiple Layouts**: Grid, Carousel, Spiral, and Wall gallery modes
+- **WebGL Rendering**: Hardware-accelerated graphics for stunning performance
+- **Real-time Effects**: Dynamic lighting, shadows, and particle systems
+- **Interactive Controls**: Mouse/touch controls for camera manipulation
+
+### Quick Start
+
+```bash
+# Install additional dependencies
+pip install flask flask-cors
+
+# Launch MX2PRO demo (starts both Gradio and Three.js server)
+./start_mx2pro.sh
+
+# Or on Windows
+start_mx2pro.bat
+
+# Or manually
+python demo/app_mx2pro.py
+```
+
+Access the demo:
+- Gradio Interface: `http://localhost:7860`
+- 3D Viewer: `http://localhost:5001`
+
+### Layout Modes
+
+1. **Grid**: Organize images in a clean grid pattern
+2. **Carousel**: Circular gallery arrangement with auto-rotate
+3. **Spiral**: Dynamic spiral configuration
+4. **Wall**: Traditional museum-style gallery
+
+For detailed documentation, see [threejs_graphics/README.md](threejs_graphics/README.md)
+
+---
 
 ## 2. Model Download
 

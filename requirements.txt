@@ -17,3 +17,8 @@ colorama==0.4.5
 Pygments==2.12.0
 markdown==3.4.1
 SentencePiece==0.1.96
+
+# for MX2PRO Three.js Graphics Integration
+flask>=2.3.0
+flask-cors>=4.0.0
+pillow>=9.0.0
