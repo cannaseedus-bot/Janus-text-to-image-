@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World of DOOM Builder - Studio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #00ff00;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 20, 0, 0.95);
+            border-bottom: 2px solid #00ff00;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2em;
+            text-shadow: 0 0 15px #00ff00;
+            display: inline-block;
+        }
+
+        .header nav {
+            float: right;
+            margin-top: 10px;
+        }
+
+        .header nav a {
+            color: #00ff00;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border: 1px solid #00ff00;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .header nav a:hover {
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 20, 0, 0.95);
+            border-right: 2px solid #00ff00;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 40, 0, 0.5);
+            border: 1px solid #00ff00;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sidebar li:hover, .sidebar li.active {
+            background: rgba(0, 60, 0, 0.8);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+            background: rgba(0, 20, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h2 {
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .card {
+            background: rgba(0, 40, 0, 0.5);
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .btn.danger {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(0, 40, 0, 0.5);
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .stat-card p {
+            color: #00cc00;
+            margin-top: 10px;
+        }
+
+        .file-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: rgba(0, 40, 0, 0.5);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item:hover {
+            background: rgba(0, 60, 0, 0.7);
+        }
+
+        .upload-zone {
+            border: 2px dashed #00ff00;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+        }
+
+        .upload-zone:hover {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #00ff00;
+        }
+
+        .upload-zone.dragging {
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            background: rgba(0, 40, 0, 0.8);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        label {
+            display: block;
+            color: #00ff00;
+            margin: 15px 0 5px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .success-message, .error-message {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #000000; }
+        ::-webkit-scrollbar-thumb { background: #00ff00; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 WORLD OF DOOM BUILDER</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/marketplace">Marketplace</a>
+            <a href="/studio">Studio</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>📋 TOOLS</h3>
+            <ul>
+                <li class="active" data-section="dashboard">📊 Dashboard</li>
+                <li data-section="wads">💾 WAD Files</li>
+                <li data-section="extract">📦 Extract Assets</li>
+                <li data-section="create-addon">➕ Create Addon</li>
+                <li data-section="my-addons">🎨 My Addons</li>
+                <li data-section="tools">🛠️ Tools</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <div class="section active" id="dashboard">
+                <h2>📊 Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="stat-wads">0</h3>
+                        <p>WAD Files</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-sprites">0</h3>
+                        <p>Sprites</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-textures">0</h3>
+                        <p>Textures</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-maps">0</h3>
+                        <p>Maps</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="stat-addons">0</h3>
+                        <p>Addons</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Quick Start</h3>
+                    <p style="color: #00cc00; line-height: 1.8;">
+                        1. Download Freedoom or add your own WAD files<br>
+                        2. Extract assets from WAD files<br>
+                        3. Create and customize addons<br>
+                        4. Publish to marketplace<br>
+                        5. Start earning!
+                    </p>
+                    <button class="btn" onclick="downloadFreedoom()">📥 Download Freedoom (Free)</button>
+                </div>
+            </div>
+
+            <!-- WAD Files Section -->
+            <div class="section" id="wads">
+                <h2>💾 WAD Files</h2>
+
+                <div class="upload-zone" id="wad-upload-zone">
+                    <h3>📁 Drop WAD File Here</h3>
+                    <p style="color: #00cc00; margin: 10px 0;">or click to browse</p>
+                    <input type="file" id="wad-file-input" accept=".wad">
+                    <button class="btn" onclick="document.getElementById('wad-file-input').click()">
+                        📂 Browse Files
+                    </button>
+                </div>
+
+                <div class="file-list" id="wad-file-list"></div>
+            </div>
+
+            <!-- Extract Assets Section -->
+            <div class="section" id="extract">
+                <h2>📦 Extract Assets</h2>
+
+                <div class="card">
+                    <h3>Select WAD File</h3>
+                    <select id="extract-wad-select" style="width: 100%; padding: 12px; background: rgba(0, 40, 0, 0.8); border: 2px solid #00ff00; color: #00ff00; border-radius: 5px; font-family: 'Courier New', monospace;">
+                        <option>Loading...</option>
+                    </select>
+
+                    <label>Output Directory Name:</label>
+                    <input type="text" id="extract-output-dir" placeholder="extracted" value="extracted">
+
+                    <button class="btn" onclick="extractAssets()" style="width: 100%; margin-top: 20px;">
+                        🚀 Extract All Assets
+                    </button>
+
+                    <div class="success-message" id="extract-success"></div>
+                    <div class="error-message" id="extract-error"></div>
+                </div>
+            </div>
+
+            <!-- Create Addon Section -->
+            <div class="section" id="create-addon">
+                <h2>➕ Create New Addon</h2>
+
+                <div class="card">
+                    <div class="form-group">
+                        <label>Addon Name:</label>
+                        <input type="text" id="addon-name" placeholder="Fantasy RPG Pack">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description:</label>
+                        <textarea id="addon-description" rows="4" placeholder="Medieval weapons, monsters, and maps..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Author:</label>
+                        <input type="text" id="addon-author" placeholder="Your Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Price (USD):</label>
+                        <input type="number" id="addon-price" placeholder="9.99" step="0.01" min="0">
+                    </div>
+
+                    <button class="btn" onclick="createAddon()" style="width: 100%;">
+                        ✨ Create Addon
+                    </button>
+
+                    <div class="success-message" id="create-addon-success"></div>
+                    <div class="error-message" id="create-addon-error"></div>
+                </div>
+            </div>
+
+            <!-- My Addons Section -->
+            <div class="section" id="my-addons">
+                <h2>🎨 My Addons</h2>
+                <div id="addons-list"></div>
+            </div>
+
+            <!-- Tools Section -->
+            <div class="section" id="tools">
+                <h2>🛠️ Development Tools</h2>
+
+                <div class="card">
+                    <h3>Available Tools</h3>
+                    <ul style="color: #00cc00; line-height: 2;">
+                        <li>📦 WAD Asset Extractor</li>
+                        <li>🎨 Sprite Editor (Coming Soon)</li>
+                        <li>🖼️ Texture Creator (Coming Soon)</li>
+                        <li>🗺️ Map Editor (Coming Soon)</li>
+                        <li>🔊 Sound Manager (Coming Soon)</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Documentation</h3>
+                    <button class="btn" onclick="window.open('https://github.com/mpickettpayments-hue/JSON-ASX', '_blank')">
+                        📖 ASX Specification
+                    </button>
+                    <button class="btn" onclick="window.open('https://github.com/mpickettpayments-hue/json-asx-cdn', '_blank')">
+                        🎮 Gaming Engine Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.sidebar li').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.getAttribute('data-section');
+
+                // Update active nav
+                document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+                item.classList.add('active');
+
+                // Update active section
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+            });
+        });
+
+        // Load dashboard stats
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const stats = await res.json();
+
+                document.getElementById('stat-wads').textContent = stats.wads;
+                document.getElementById('stat-sprites').textContent = stats.assets.sprites;
+                document.getElementById('stat-textures').textContent = stats.assets.textures;
+                document.getElementById('stat-maps').textContent = stats.assets.maps;
+                document.getElementById('stat-addons').textContent = stats.addons;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load WAD files list
+        async function loadWADs() {
+            try {
+                const res = await fetch('/api/wads');
+                const data = await res.json();
+
+                const list = document.getElementById('wad-file-list');
+                list.innerHTML = '';
+
+                if (data.wads.length === 0) {
+                    list.innerHTML = '<p style="color: #00cc00; text-align: center; padding: 40px;">No WAD files found. Upload one or download Freedoom!</p>';
+                    document.getElementById('extract-wad-select').innerHTML = '<option>No WAD files available</option>';
+                    return;
+                }
+
+                // Populate file list
+                data.wads.forEach(wad => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${wad.name}</strong><br>
+                            <small style="color: #00cc00;">${(wad.size / 1024 / 1024).toFixed(2)} MB</small>
+                        </div>
+                        <button class="btn" onclick="selectWAD('${wad.name}')">📦 Extract</button>
+                    `;
+                    list.appendChild(item);
+                });
+
+                // Populate select dropdown
+                const select = document.getElementById('extract-wad-select');
+                select.innerHTML = data.wads.map(wad =>
+                    `<option value="${wad.name}">${wad.name}</option>`
+                ).join('');
+
+            } catch (error) {
+                console.error('Error loading WADs:', error);
+            }
+        }
+
+        // WAD file upload
+        const wadUploadZone = document.getElementById('wad-upload-zone');
+        const wadFileInput = document.getElementById('wad-file-input');
+
+        wadUploadZone.addEventListener('click', () => wadFileInput.click());
+
+        wadUploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            wadUploadZone.classList.add('dragging');
+        });
+
+        wadUploadZone.addEventListener('dragleave', () => {
+            wadUploadZone.classList.remove('dragging');
+        });
+
+        wadUploadZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            wadUploadZone.classList.remove('dragging');
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.toLowerCase().endsWith('.wad')) {
+                await uploadWAD(file);
+            }
+        });
+
+        wadFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                await uploadWAD(file);
+            }
+        });
+
+        async function uploadWAD(file) {
+            const formData = new FormData();
+            formData.append('wad', file);
+
+            try {
+                const res = await fetch('/api/upload/wad', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    alert(`✅ ${result.file} uploaded successfully!`);
+                    loadWADs();
+                    loadStats();
+                }
+            } catch (error) {
+                alert('❌ Upload failed: ' + error.message);
+            }
+        }
+
+        // Extract assets
+        async function extractAssets() {
+            const wadFile = document.getElementById('extract-wad-select').value;
+            const outputDir = document.getElementById('extract-output-dir').value;
+
+            const successMsg = document.getElementById('extract-success');
+            const errorMsg = document.getElementById('extract-error');
+
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wadFile, outputDir })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    successMsg.textContent = `✅ Extracted ${result.stats.sprites} sprites, ${result.stats.textures} textures, ${result.stats.maps} maps!`;
+                    successMsg.style.display = 'block';
+                    loadStats();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                errorMsg.textContent = '❌ ' + error.message;
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Create addon
+        async function createAddon() {
+            const name = document.getElementById('addon-name').value;
+            const description = document.getElementById('addon-description').value;
+            const author = document.getElementById('addon-author').value;
+            const price = parseFloat(document.getElementById('addon-price').value) || 0;
+
+            const successMsg = document.getElementById('create-addon-success');
+            const errorMsg = document.getElementById('create-addon-error');
+
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            if (!name || !description || !author) {
+                errorMsg.textContent = '❌ Please fill in all fields';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/addons/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description, author, price })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    successMsg.textContent = `✅ Addon "${name}" created successfully! ID: ${result.addon.id}`;
+                    successMsg.style.display = 'block';
+
+                    // Clear form
+                    document.getElementById('addon-name').value = '';
+                    document.getElementById('addon-description').value = '';
+                    document.getElementById('addon-author').value = '';
+                    document.getElementById('addon-price').value = '';
+
+                    loadStats();
+                    loadMyAddons();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                errorMsg.textContent = '❌ ' + error.message;
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Load my addons
+        async function loadMyAddons() {
+            try {
+                const res = await fetch('/api/addons');
+                const data = await res.json();
+
+                const list = document.getElementById('addons-list');
+                list.innerHTML = '';
+
+                if (data.addons.length === 0) {
+                    list.innerHTML = '<div class="card"><p style="color: #00cc00;">No addons created yet. Create your first one!</p></div>';
+                    return;
+                }
+
+                data.addons.forEach(addon => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${addon.name}</h3>
+                        <p style="color: #00cc00;">${addon.description}</p>
+                        <p style="color: #00cc00; margin-top: 10px;">
+                            <strong>Price:</strong> $${addon.price.toFixed(2)}<br>
+                            <strong>Author:</strong> ${addon.author}<br>
+                            <strong>Version:</strong> ${addon.version}
+                        </p>
+                        <button class="btn">✏️ Edit</button>
+                        <button class="btn">📤 Publish</button>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading addons:', error);
+            }
+        }
+
+        function selectWAD(wadName) {
+            document.getElementById('extract-wad-select').value = wadName;
+            document.querySelector('[data-section="extract"]').click();
+        }
+
+        function downloadFreedoom() {
+            alert('Run: ./download-freedoom.sh\n\nThis will download Freedoom WAD files (100% legal and free)');
+        }
+
+        // Initialize
+        loadStats();
+        loadWADs();
+        loadMyAddons();
+        setInterval(loadStats, 30000); // Refresh stats every 30 seconds
+    </script>
+</body>
+</html>

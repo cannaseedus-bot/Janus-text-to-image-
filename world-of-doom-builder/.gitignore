@@ -1,0 +1,52 @@
+# World of DOOM Builder - Git Ignore
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# User-provided WAD files (NOT INCLUDED IN GIT)
+wads/*.wad
+wads/*.WAD
+!wads/README.md
+
+# User uploads
+uploads/
+*.lmp
+*.deh
+
+# Extracted assets (generated, not committed)
+assets/extracted/
+
+# Environment
+.env
+.env.local
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# Database (if using local DB)
+*.db
+*.sqlite
+
+# User-specific addons in development
+addons/*/work-in-progress/
+
+# NOTE: This ensures we NEVER accidentally commit copyrighted WAD files
+# Users must provide their own legally obtained game files
