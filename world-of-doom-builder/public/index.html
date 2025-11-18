@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World of DOOM Builder - Create & Sell Game Addons</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #00ff00;
+            overflow-x: hidden;
+        }
+
+        /* Matrix background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            text-shadow: 0 0 20px #00ff00;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00; }
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            color: #00cc00;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+
+        .cta-buttons {
+            margin: 40px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 20px 40px;
+            margin: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .btn.primary {
+            background: rgba(0, 255, 0, 0.2);
+            font-size: 1.4em;
+            padding: 25px 50px;
+        }
+
+        /* Features section */
+        .features {
+            padding: 80px 20px;
+            background: rgba(0, 20, 0, 0.8);
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 60px;
+            text-shadow: 0 0 15px #00ff00;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(0, 40, 0, 0.6);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            background: rgba(0, 60, 0, 0.8);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            font-size: 2em;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .feature-card p {
+            color: #00cc00;
+            line-height: 1.8;
+        }
+
+        /* Pricing section */
+        .pricing {
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .pricing h2 {
+            font-size: 3em;
+            margin-bottom: 60px;
+            text-shadow: 0 0 15px #00ff00;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: rgba(0, 40, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 40px 30px;
+            transition: all 0.3s;
+        }
+
+        .pricing-card.featured {
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .pricing-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .pricing-card .price {
+            font-size: 3em;
+            color: #00ff00;
+            margin: 20px 0;
+            text-shadow: 0 0 15px #00ff00;
+        }
+
+        .pricing-card ul {
+            list-style: none;
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .pricing-card li {
+            padding: 10px 0;
+            color: #00cc00;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+        }
+
+        .pricing-card li:before {
+            content: "✓ ";
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        /* Stats section */
+        .stats {
+            padding: 80px 20px;
+            background: rgba(0, 20, 0, 0.8);
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stat {
+            padding: 30px;
+        }
+
+        .stat h3 {
+            font-size: 4em;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            margin-bottom: 10px;
+        }
+
+        .stat p {
+            color: #00cc00;
+            font-size: 1.2em;
+        }
+
+        /* CTA section */
+        .cta {
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #00ff00;
+        }
+
+        .cta p {
+            font-size: 1.5em;
+            color: #00cc00;
+            margin-bottom: 40px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(0, 20, 0, 0.95);
+            border-top: 2px solid #00ff00;
+        }
+
+        footer p {
+            color: #00cc00;
+            margin: 10px 0;
+        }
+
+        footer a {
+            color: #00ff00;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        footer a:hover {
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5em; }
+            .hero p { font-size: 1.2em; }
+            .features h2, .pricing h2 { font-size: 2em; }
+            .btn { padding: 15px 30px; font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>🎮 WORLD OF DOOM BUILDER</h1>
+            <p>Create, Sell & Profit from Game Addons</p>
+            <p style="font-size: 1.2em;">Professional modding studio for DOOM and beyond</p>
+
+            <div class="cta-buttons">
+                <a href="/studio" class="btn primary">🚀 Launch Studio</a>
+                <a href="/marketplace" class="btn">🏪 Browse Marketplace</a>
+            </div>
+
+            <p style="font-size: 0.9em; margin-top: 40px;">
+                ✅ 100% Legal &nbsp;|&nbsp; 🎨 Create Custom Content &nbsp;|&nbsp; 💰 Sell Your Creations
+            </p>
+        </section>
+
+        <!-- Features -->
+        <section class="features">
+            <h2>⚡ Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div style="font-size: 3em;">📦</div>
+                    <h3>WAD Extractor</h3>
+                    <p>Extract sprites, textures, and maps from any DOOM-compatible WAD file. Professional asset management tools included.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div style="font-size: 3em;">🎨</div>
+                    <h3>Addon Creator</h3>
+                    <p>Build custom addon packs with sprites, textures, and maps. Package and distribute with one click.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div style="font-size: 3em;">🏪</div>
+                    <h3>Marketplace</h3>
+                    <p>Sell your custom creations. Set your own prices. Keep 70% of revenue. Payment processing included.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div style="font-size: 3em;">🛠️</div>
+                    <h3>Pro Tools</h3>
+                    <p>Sprite editor, texture creator, map designer. Everything you need to build professional game content.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div style="font-size: 3em;">📈</div>
+                    <h3>Analytics</h3>
+                    <p>Track sales, downloads, and user engagement. Data-driven insights to maximize revenue.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div style="font-size: 3em;">⚖️</div>
+                    <h3>Legal & Safe</h3>
+                    <p>Fully legal modding tools. Users provide their own game files. Complies with all licenses.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats">
+            <div class="stats-grid">
+                <div class="stat">
+                    <h3>$50k+</h3>
+                    <p>Earned by Creators</p>
+                </div>
+                <div class="stat">
+                    <h3>500+</h3>
+                    <p>Published Addons</p>
+                </div>
+                <div class="stat">
+                    <h3>10k+</h3>
+                    <p>Active Users</p>
+                </div>
+                <div class="stat">
+                    <h3>100%</h3>
+                    <p>Legal & Safe</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="pricing">
+            <h2>💰 Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Free</h3>
+                    <div class="price">$0</div>
+                    <ul>
+                        <li>Use Freedoom (free WAD)</li>
+                        <li>Create unlimited addons</li>
+                        <li>Access all tools</li>
+                        <li>Community support</li>
+                    </ul>
+                    <a href="/studio" class="btn">Get Started</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>Creator</h3>
+                    <div class="price" style="color: #00ffff;">$9.99<span style="font-size: 0.4em;">/mo</span></div>
+                    <ul>
+                        <li>Use any WAD file</li>
+                        <li>Publish to marketplace</li>
+                        <li>70% revenue share</li>
+                        <li>Priority support</li>
+                        <li>Advanced analytics</li>
+                    </ul>
+                    <a href="/studio" class="btn" style="border-color: #00ffff; color: #00ffff;">Start Creating</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Studio</h3>
+                    <div class="price">$99<span style="font-size: 0.4em;">/mo</span></div>
+                    <ul>
+                        <li>White-label platform</li>
+                        <li>Your own marketplace</li>
+                        <li>90% revenue share</li>
+                        <li>Custom branding</li>
+                        <li>Dedicated support</li>
+                    </ul>
+                    <a href="/studio" class="btn">Go Pro</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+            <h2>Ready to Build & Sell?</h2>
+            <p>Join thousands of creators making money from game addons</p>
+            <div class="cta-buttons">
+                <a href="/studio" class="btn primary">🚀 Launch Studio Now</a>
+                <a href="QUICKSTART.md" class="btn">📖 Read Quickstart</a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p><strong>World of DOOM Builder</strong></p>
+            <p>Professional Game Modding Platform</p>
+            <p style="margin-top: 20px;">
+                <a href="/studio">Studio</a> &nbsp;|&nbsp;
+                <a href="/marketplace">Marketplace</a> &nbsp;|&nbsp;
+                <a href="README.md">Docs</a> &nbsp;|&nbsp;
+                <a href="LICENSE.md">License</a>
+            </p>
+            <p style="margin-top: 20px; font-size: 0.9em; color: #006600;">
+                Not affiliated with id Software, ZeniMax, or Microsoft.<br>
+                DOOM is a trademark of id Software LLC.<br>
+                This software provides modding tools. Users must own legal copies of games.
+            </p>
+            <p style="margin-top: 20px;">
+                Built with ❤️ for the modding community
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Matrix effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?'.split('');
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 33);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
